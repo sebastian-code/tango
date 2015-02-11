@@ -12,9 +12,10 @@ def index(request):
     # Note that the first parameter is the template we wish to use.
 
     return render(request, 'rango/index.html', context_dict)
-    
+
 # def index(request):
 # 	return HttpResponse("Hello Motherfuckers! <a href='/rango/about'>About</a>")
 
 def about(request):
-	return HttpResponse("Rango says this the about page! <a href='/rango/'>Rango</a>")
+	context_dict = {'about_message': 'this the about page!'}
+	return render(request, 'rango/about.html', context_dict)
