@@ -3,16 +3,22 @@
 {% load staticfiles %}
 
 <html>
-
     <head>
         <title>Rango</title>
     </head>
-
     <body>
         <h1>Rango says...</h1>
-        hello world! <strong>{{ boldmessage }}</strong><br />
+        <strong>{{ boldmessage }}</strong><br />
+        {% if categories %}
+        	<ul>
+        		{% for category in categories %}
+        		<li>{{ category.name }}</li>
+        		{% endfor %}
+        	</ul>
+        {% else %}
+        	<strong>There are no categories present.</strong>
+        {% endif %}
+        <img src="{% static "images/rango.png" %}" alt="Picture of Rango"/><br />
         <a href="/rango/about/">About</a><br />
-        <img src="{% static "images/rango.png" %}" alt="Picture of Rango" />
     </body>
-
 </html>
