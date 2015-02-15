@@ -8,17 +8,27 @@
     </head>
     <body>
         <h1>Rango says...</h1>
-        <strong>{{ boldmessage }}</strong><br />
+        <strong>{{ cat_message }}</strong><br />
         {% if categories %}
         	<ul>
         		{% for category in categories %}
-        		<li>{{ category.name }}</li>
+        		<li><a href="/rango/category/{{ category.slug }}">{{ category.name }}</a></li>
         		{% endfor %}
         	</ul>
         {% else %}
         	<strong>There are no categories present.</strong>
         {% endif %}
-        <img src="{% static "images/rango.png" %}" alt="Picture of Rango"/><br />
+       <strong>{{ pag_message }}</strong><br />
+        {% if pages %}
+            <ul>
+                {% for page in pages %}
+                <li><a href="{{ page.url }}">{{ page.title }}</a></li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <strong>There are no pages present.</strong>
+        {% endif %}
+        <!-- <img src="{% static "images/rango.png" %}" alt="Picture of Rango"/><br /> -->
         <a href="/rango/about/">About</a><br />
     </body>
 </html>
