@@ -3,6 +3,8 @@ from django.http import HttpResponse
 
 from rango.models import Category, Page
 
+from rango.forms import CategoryForm
+
 def category(request, category_name_slug):
 
     # Create a context dictionary which we can pass to the template rendering engine.
@@ -55,17 +57,26 @@ def index(request):
     # Render the response and send it back!
     return render(request, 'rango/index.html', context_dict)
 
-# def index(request):
+def add_category(request):
+    # A HTTP POST?
+    if request.method == 'POST':
+        form = CategoryForm(request.POST)
 
-#     # Construct a dictionary to pass to the template engine as its context.
-#     # Note the key boldmessage is the same as {{ boldmessage }} in the template!
-#     context_dict = {'boldmessage': "I am bold font from the context"}
+        # Have we been provided with a valid form?
+        if form.is_valid():
+            # Save the new category to the database.
+            form.save(commit=True)
 
-#     # Return a rendered response to send to the client.
-#     # We make use of the shortcut function to make our lives easier.
-#     # Note that the first parameter is the template we wish to use.
+            # Now call the index() view.
+            # The user will be shown the homepage.
+            return index(request)
+        else:
+            # The supplied form contained errors - just print them to the terminal.
+            print form.errors
+    else:
+        # If the request was not a POST, display the form to enter details.
+        form = CategoryForm()
 
-#     return render(request, 'rango/index.html', context_dict)
-
-# def index(request):
-# 	return HttpResponse("Hello Motherfuckers! <a href='/rango/about'>About</a>")
+    # Bad form (or form details), no form supplied...
+    # Render the form with error messages (if any).
+    return render(request, 'rango/add_category.html', {'form': form})
