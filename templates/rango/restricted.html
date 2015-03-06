@@ -2,11 +2,11 @@
 
 {% load staticfiles %}
 
-{% block title %}About{% endblock %}
+{% block title %}Restricted Page{% endblock %}
 
 {% block body_block %}
-	<h1>The about page</h1>
-	Rango says <strong>{{ about_message }}</strong><br />
+	<h1>Restricted Page</h1>
+	Rango says <strong>You are seeing this because you're loged in</strong><br />
 	<img src="{% static "images/rango.png" %}" alt="Picture of Rango" />
-
+	
 {% endblock %}
