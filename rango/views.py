@@ -9,7 +9,10 @@ from rango.forms import CategoryForm, PageForm, UserForm, UserProfileForm
 
 from datetime import datetime
 
-# Use the login_required() decorator to ensure only those logged in can access the view.
+# Use the login_required() decorator to ensure only those logged in
+# can access the view.
+
+
 @login_required
 def user_logout(request):
     # Since we know the user is logged in, we can now just log them out.
@@ -18,9 +21,11 @@ def user_logout(request):
     # Take the user back to the homepage.
     return HttpResponseRedirect('/rango/')
 
+
 @login_required
 def restricted(request):
     return render(request, 'rango/restricted.html', {})
+
 
 def user_login(request):
 
@@ -28,9 +33,12 @@ def user_login(request):
     if request.method == 'POST':
         # Gather the username and password provided by the user.
         # This information is obtained from the login form.
-                # We use request.POST.get('<variable>') as opposed to request.POST['<variable>'],
-                # because the request.POST.get('<variable>') returns None, if the value does not exist,
-                # while the request.POST['<variable>'] will raise key error exception
+                # We use request.POST.get('<variable>') as opposed to
+                # request.POST['<variable>'],
+                # because the request.POST.get('<variable>') returns None,
+                # if the value does not exist,
+                # while the request.POST['<variable>'] will raise key error
+                # exception
         username = request.POST.get('username')
         password = request.POST.get('password')
 
@@ -39,8 +47,8 @@ def user_login(request):
         user = authenticate(username=username, password=password)
 
         # If we have a User object, the details are correct.
-        # If None (Python's way of representing the absence of a value), no user
-        # with matching credentials was found.
+        # If None (Python's way of representing the absence of a value),
+        # no user with matching credentials was found.
         if user:
             # Is the account active? It could have been disabled.
             if user.is_active:
@@ -63,13 +71,8 @@ def user_login(request):
         # blank dictionary object...
         return render(request, 'rango/login.html', {})
 
-def register(request):
 
-    # A boolean value for telling the template whether the registration was successful.
-    # Set to False initially. Code changes value to True when registration succeeds.
-    if request.session.test_cookie_worked():
-        print ">>>> TEST COOKIE WORKED!"
-        request.session.delete_test_cookie()
+def register(request):
 
     registered = False
 
@@ -91,20 +94,24 @@ def register(request):
             user.save()
 
             # Now sort out the UserProfile instance.
-            # Since we need to set the user attribute ourselves, we set commit=False.
-            # This delays saving the model until we're ready to avoid integrity problems.
+            # Since we need to set the user attribute ourselves, we set
+            # commit=False.
+            # This delays saving the model until we're ready to avoid integrity
+            # problems.
             profile = profile_form.save(commit=False)
             profile.user = user
 
             # Did the user provide a profile picture?
-            # If so, we need to get it from the input form and put it in the UserProfile model.
+            # If so, we need to get it from the input form and put it in the
+            # UserProfile model.
             if 'picture' in request.FILES:
                 profile.picture = request.FILES['picture']
 
             # Now we save the UserProfile model instance.
             profile.save()
 
-            # Update our variable to tell the template registration was successful.
+            # Update our variable to tell the template registration was
+            # successful.
             registered = True
 
         # Invalid form or forms - mistakes or something else?
@@ -120,22 +127,24 @@ def register(request):
         profile_form = UserProfileForm()
 
     # Render the template depending on the context.
-    return render(request, 'rango/register.html',{
-                            'user_form': user_form, 
-                            'profile_form': profile_form, 
+    return render(request, 'rango/register.html', {
+                            'user_form': user_form,
+                            'profile_form': profile_form,
                             'registered': registered
-                            } )
+                            })
 
 
 def category(request, category_name_slug):
 
-    # Create a context dictionary which we can pass to the template rendering engine.
+    # Create a context dictionary which we can pass to the template rendering
+    # engine.
     context_dict = {}
 
     try:
         # Can we find a category name slug with the given name?
         # If we can't, the .get() method raises a DoesNotExist exception.
-        # So the .get() method returns one model instance or raises an exception.
+        # So the .get() method returns one model instance or raises an
+        # exception.
         category = Category.objects.get(slug=category_name_slug)
         context_dict['category_name'] = category.name
         context_dict['category_name_slug'] = category_name_slug
@@ -146,65 +155,74 @@ def category(request, category_name_slug):
 
         # Adds our results list to the template context under name pages.
         context_dict['pages'] = pages
-        # We also add the category object from the database to the context dictionary.
+        # We also add the category object from the database to the context
+        # dictionary.
         # We'll use this in the template to verify that the category exists.
         context_dict['category'] = category
     except Category.DoesNotExist:
         # We get here if we didn't find the specified category.
-        # Don't do anything - the template displays the "no category" message for us.
+        # Don't do anything - the template displays the "no category" message
+        # for us.
         pass
 
     # Go render the response and return it to the client.
     return render(request, 'rango/category.html', context_dict)
 
+
 def page(request):
     pass
 
+
 def about(request):
+    if request.session.get('visits'):
+        count = request.session.get('visits')
+    else:
+        count = 0
+
     context_dict = {'about_message': 'this the about page!'}
+    context_dict = {'visits_msg': "You have visited us"}
+    context_dict = {'visits': count}
+
+    # remember to include the visit data
     return render(request, 'rango/about.html', context_dict)
+
 
 def index(request):
 
-    category_list = Category.objects.all()
+    category_list = Category.objects.order_by('-likes')[:5]
     page_list = Page.objects.order_by('-views')[:5]
+
     context_dict = {'categories': category_list, 'pages': page_list}
 
-    # Get the number of visits to the site.
-    # We use the COOKIES.get() function to obtain the visits cookie.
-    # If the cookie exists, the value returned is casted to an integer.
-    # If the cookie doesn't exist, we default to zero and cast that.
-    visits = int(request.COOKIES.get('visits', '1'))
-
+    visits = request.session.get('visits')
+    if not visits:
+        visits = 1
     reset_last_visit_time = False
-    response = render(request, 'rango/index.html', context_dict)
-    # Does the cookie last_visit exist?
-    if 'last_visit' in request.COOKIES:
-        # Yes it does! Get the cookie's value.
-        last_visit = request.COOKIES['last_visit']
-        # Cast the value to a Python date/time object.
-        last_visit_time = datetime.strptime(last_visit[:-7], "%Y-%m-%d %H:%M:%S")
 
-        # If it's been more than a day since the last visit...
-        if (datetime.now() - last_visit_time).seconds > 5:
+    last_visit = request.session.get('last_visit')
+    if last_visit:
+        last_visit_time = datetime.strptime(last_visit[:-7],
+                                            "%Y-%m-%d %H:%M:%S")
+
+        if (datetime.now() - last_visit_time).seconds > 0:
+            # ...reassign the value of the cookie to +1 of what it was before..
             visits = visits + 1
-            # ...and flag that the cookie last visit needs to be updated
+            # ...and update the last visit cookie, too.
             reset_last_visit_time = True
     else:
-        # Cookie last_visit doesn't exist, so flag that it should be set.
+        # Cookie last_visit doesn't exist, so create it to the current
+        # date/time.
         reset_last_visit_time = True
 
-        context_dict['visits'] = visits
-
-        #Obtain our Response object early so we can add cookie information.
-        response = render(request, 'rango/index.html', context_dict)
-
     if reset_last_visit_time:
-        response.set_cookie('last_visit', datetime.now())
-        response.set_cookie('visits', visits)
+        request.session['last_visit'] = str(datetime.now())
+        request.session['visits'] = visits
+    context_dict['visits'] = visits
 
-    # Return response back to the user, updating any cookies that need changed.
+    response = render(request, 'rango/index.html', context_dict)
+
     return response
+
 
 @login_required
 def add_category(request):
@@ -221,7 +239,8 @@ def add_category(request):
             # The user will be shown the homepage.
             return index(request)
         else:
-            # The supplied form contained errors - just print them to the terminal.
+            # The supplied form contained errors - just print them to the
+            # terminal.
             print form.errors
     else:
         # If the request was not a POST, display the form to enter details.
@@ -230,6 +249,7 @@ def add_category(request):
     # Bad form (or form details), no form supplied...
     # Render the form with error messages (if any).
     return render(request, 'rango/add_category.html', {'form': form})
+
 
 @login_required
 def add_page(request, category_name_slug):
@@ -254,6 +274,6 @@ def add_page(request, category_name_slug):
     else:
         form = PageForm()
 
-    context_dict = {'form':form, 'category': cat}
+    context_dict = {'form': form, 'category': cat}
 
     return render(request, 'rango/add_page.html', context_dict)
