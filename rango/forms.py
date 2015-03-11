@@ -1,7 +1,13 @@
 from django import forms
-from django.contrib.auth.models import User
-from rango.models import Category, Page, UserProfile
+# from django.contrib.auth.models import User
+from rango.models import Category, Page
 
+
+"""
+# from rango.models import UserProfile
+
+Bloque comentado por eliminacion de uso de este modelo, reemplazado por la
+funcionalidad suministrada por el modulo redux.
 
 class UserForm(forms.ModelForm):
     password = forms.CharField(widget=forms.PasswordInput())
@@ -15,6 +21,7 @@ class UserProfileForm(forms.ModelForm):
     class Meta:
         model = UserProfile
         fields = ('website', 'picture')
+"""
 
 
 class CategoryForm(forms.ModelForm):

@@ -1,11 +1,13 @@
 from django.shortcuts import render
-from django.http import HttpResponse, HttpResponseRedirect
-from django.contrib.auth import authenticate, login, logout
+# from django.http import HttpResponse, HttpResponseRedirect
+# from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 
 from rango.models import Category, Page
 
-from rango.forms import CategoryForm, PageForm, UserForm, UserProfileForm
+from rango.forms import CategoryForm, PageForm
+
+# from rango.forms import UserForm, UserProfileForm
 
 from datetime import datetime
 
@@ -161,6 +163,7 @@ def add_page(request, category_name_slug):
     context_dict = {'form': form, 'category': cat}
 
     return render(request, 'rango/add_page.html', context_dict)
+
 
 """
 Commented block containing the legacy functions to admin loggin functionality

@@ -4,6 +4,7 @@
 
 {% block body_block %}
     <h1>Add a New Category</h1>
+    {# <form id="page_form" method="post" action="/rango/category/{{ category_name_slug }}/add_category/"> #}
     <form id="category_form" method="post" action="/rango/add_category/">
 
         {% csrf_token %}
